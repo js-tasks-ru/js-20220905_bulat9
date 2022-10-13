@@ -1,11 +1,15 @@
-import SortableList from '../2-sortable-list/index.js';
-import escapeHtml from './utils/escape-html.js';
-import fetchJson from './utils/fetch-json.js';
+import escapeHtml from "../store/escape-html.js";
+import SortableList from '../components/SortableList.js';
+import NotificationMessage from "./Notification.js";
+
+import errorHandler from "../store/errorHandler.js";
+
+import grabIcon from '../styles/svg/icon-grab.svg';
+import trashIcon from '../styles/svg//icon-trash.svg';
 
 const IMGUR_CLIENT_ID = '28aaa2e823b03b1';
 const IMGUR_CLIENT = 'https://api.imgur.com/';
 
-const BACKEND_URL = 'https://course-js.javascript.ru';
 
 
 export default class ProductForm {
@@ -16,17 +20,17 @@ export default class ProductForm {
   constructor(
     productId,
     {
-      categoriesPath = '/api/rest/categories',
-      productPath = `/api/rest/products`,
-      imagePath = '3/image'
-    } = {}
+      categoriesURL,
+      productURL,
+      imageURL,
+    }
   ) {
     this.productId = productId;
   
     this.urls = {
-      categories: new URL(categoriesPath, BACKEND_URL),
-      product: new URL(productPath, BACKEND_URL),
-      images: new URL(imagePath, IMGUR_CLIENT),
+      categories: categoriesURL,
+      product: productURL,
+      images: new URL(imageURL, IMGUR_CLIENT),
     };
   }
 
@@ -88,12 +92,12 @@ export default class ProductForm {
         <input type="hidden" name="url" value="${escapedUrl}">
         <input type="hidden" name="source" value="${escapedSource}">
         <span>
-          <img src="icon-grab.svg" data-grab-handle="" alt="grab">
+          <img src=${grabIcon} data-grab-handle="" alt="grab">
           <img class="sortable-table__cell-img" alt="Image" src="${escapedUrl}">
           <span>${escapedSource}</span>
         </span>
         <button type="button">
-          <img src="icon-trash.svg" data-delete-handle="" alt="delete">
+          <img src=${trashIcon} data-delete-handle="" alt="delete">
         </button>
       </li>`;
     return wrapper.firstElementChild;
@@ -226,15 +230,16 @@ export default class ProductForm {
       const response = await fetch(url.toString());
       if (response.ok) {return await response.json();} 
       
-      throw new Error('error at server (unmutable request)');
+      throw new Error('Ошибка сети/Ошибка на сервере');
     } catch (error) {
-      console.error(error);
-      throw new Error(error);
+      errorHandler(error);
+      //throw new Error(error);
     }
   }
 
   async fetchMutableRequest(method, body) {
     const { product } = this.urls;
+    const {productForm} = this.subElements;
     try {
       const response = await fetch(product.toString(), {
         method,
@@ -244,10 +249,25 @@ export default class ProductForm {
         body: JSON.stringify(body)
       });
 
-      if (!response.ok) {throw new Error('error at server (mutable request)');}
+      if (!response.ok) {throw new Error('Ошибка сети/Ошибка на сервере');}
+
+      if (method === 'PUT') {
+        const elementA = document.createElement('a');
+        elementA.setAttribute('href', `/products/${body['id']}`);
+        productForm.append(elementA);
+        elementA.click();
+      }
+      const notification = new NotificationMessage({
+        message: 'Товар сохранен',
+        wrapperOfElement: document.body,
+        duration: 3000,
+        type: 'success'
+      });
+      notification.show();
+
     } catch (error) {
-      console.error(error);
-      throw new Error(error);
+      errorHandler(error);
+      //throw new Error("Ошибка сети/Ошибка на сервере");
     }
   }
 
@@ -269,7 +289,7 @@ export default class ProductForm {
     
     const entriesOfResponses = dataOfResponses.map((data, index) => {
       const nameOfData = namesOfURLs[index];
-      if (nameOfData === 'product') {this.images = data[0].images ?? [];}
+      if (nameOfData === 'product') {this.images = data[0]?.images ?? [];}
       return [nameOfData, data];
     });
 
@@ -317,30 +337,32 @@ export default class ProductForm {
         body: formData,
         referrer: ''
       });
+
+      if (!response.ok) {throw new Error("Ошибка сети/Ошибка на сервере");}
       const responseJSON = await response.json();
 
       this.toggleStatusOfLoadingImage();
       return responseJSON.data.link;
 
     } catch (error) {
-      console.error(error);
-      return null;
+      errorHandler(error);
+      //throw new Error("Ошибка сети/Ошибка на сервере");
     }
   }
 
   getInputIMGLoader() {
     const wrapper = document.createElement('div');
-    wrapper.innerHTML = `<input name="image" type="file" accept="image/*" hidden/>`;
+    wrapper.innerHTML = `<input name="image" type="file" accept="image/*" style="opacity:0"/>`;
     return wrapper.firstElementChild;
   }
 
   loadImgHander = () => {
+
     const {productForm, sortableList} = this.subElements;
 
     const inputIMGLoader = this.getInputIMGLoader();
 
     inputIMGLoader.onchange = async () => {
-
       const formData = new FormData();
       const file = inputIMGLoader.files[0];
       formData.append(inputIMGLoader.name, file);
@@ -361,22 +383,15 @@ export default class ProductForm {
 
     productForm.append(inputIMGLoader);
     inputIMGLoader.click();
-    
   } 
 
   submitHandler = (event) => {
     event.preventDefault();
-
     const formData = this.getFormatedFormData();
 
-    const [nameOfEvent, method] = this.productId 
-      ? ['product-updated', 'PATCH'] 
-      : ['product-saved', 'PUT'];
-
-    this.element.dispatchEvent(new CustomEvent(nameOfEvent, {
-      bubles: true,
-      detail: formData,
-    }));
+    const method = this.productId 
+      ? 'PATCH'
+      : 'PUT';
 
     this.fetchMutableRequest(method, formData);
   }
@@ -409,6 +424,7 @@ export default class ProductForm {
   }
 
   addEventListeners() {
+
     const { productForm, imageListContainer } = this.subElements;
     productForm.addEventListener('submit', this.submitHandler);
     productForm.uploadImage.addEventListener('click', this.loadImgHander);
@@ -427,7 +443,6 @@ export default class ProductForm {
         productForm[name].value = value;
       }
     });
-  
   }
 
   createImages() {
@@ -439,11 +454,14 @@ export default class ProductForm {
   async render() {
     this.data = await this.getData();
     this.element = this.getElement();
-
-    if (this.productId) { this.createProduct(); }
     this.createImages();
+
     this.setSubElements();
     this.addEventListeners();
+    
+    if (this.productId) { this.createProduct(); }
+
+    return this.element;
   }
 
   remove() {

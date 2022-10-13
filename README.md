@@ -1,45 +1,63 @@
-[![Tests workflow](https://github.com/k1ntsugi1/js-20220905_bulat9/actions/workflows/tests.yaml/badge.svg)](https://github.com/k1ntsugi1/js-20220905_bulat9/actions/workflows/tests.yaml)
+## In process
 
-## To start project:
+# Admin Dashboard
 
-Для старта проекта необходимо выполнить следующие команды:
+**Important!**
+
+For correct build via Webpack you must have:
+
+* nodejs >=16.13.1
+* npm >= 7.10.0
+
+Данный проект был разработан в рамках курса ["JavaScript/​DOM/​Интерфейсы" для программистов](https://learn.javascript.ru/courses/js)
+проекта [learn.javascript.ru](https://learn.javascript.ru/)
+
+> Этот курс предназначен для изучения JavaScript программистами, а также для тех, кто разрабатывал на нём эпизодически и теперь хочет освоить профессионально.
+
+Проект - это фронтенд часть типичной "Панели управления" для магазина товаров,
+реализованная на чистом JavaScript.
+
+## Preview
+
+[**Preview**](https://js-20220905-bulat9.vercel.app/)
+
+## Tech stack
+
+* <img alt="javascript" width="26px" src="https://raw.githubusercontent.com/boris-catsvill/project-structure/master/tech-stack/javascript.png" /> Javascript
+* <img alt="html" width="26px" src="https://raw.githubusercontent.com/boris-catsvill/project-structure/master/tech-stack/html.png" /> HTML
+* <img alt="CSS" width="26px" src="https://raw.githubusercontent.com/boris-catsvill/project-structure/master/tech-stack/css.png" /> CSS
+
+## To start project in development mode:
 
 * `npm install` - установит необходимые зависимости
+* `npm run develop` - запустит "WebpackDevServer"
 
-**Note:** У вас уже должна быть установлена Nodejs 
-Проверить текущие версии можно набрав в консоли/терминале следующие команды: `node -v` и `npm -v`.
+**Note:** Версии требуемые проектом указаны в `package.json` в поле `engines`
 
-Версии требуемые проектом указаны в `package.json` в поле `engines`  
+## To build project:
 
-## To run tests:
+`npm run build` - "соберет" проект в "production" режиме.
 
-### To run all tests
-Чтобы запустить тесты, воспользуйтесь командой:
+## Teacher
 
-`npm run test:all`
+**Владимир Шевчук**
 
-### To run tests from a specific directory
+* [<img alt="GitHub" width="18px" src="https://raw.githubusercontent.com/boris-catsvill/project-structure/master/tech-stack/github-logo.png" /> GitHub](https://github.com/dosandk)
+* [<img alt="learn.javascript" width="18px" src="https://raw.githubusercontent.com/boris-catsvill/project-structure/master/tech-stack/learn-javascript-logo.png" /> learn.javascript](http://learn.javascript.ru/profile/v-shevchuk)
+* [<img alt="Linkedin" width="18px" src="https://raw.githubusercontent.com/boris-catsvill/project-structure/master/tech-stack/linkedin-logo.png" /> Linkedin](https://www.linkedin.com/in/dosandk/)
 
-Чтобы запустить тесты из определенной директории, воспользуйтесь командой:
+## В данный момент проблемы:
+  - в целом есть части кода, которые я написал "в лоб"
+  
+## Задачи:
 
-`npm run test:specific --findRelatedTests 01-javascript-data-types/1-sort-strings/**/*.spec.js`
-
-"01-javascript-data-types" - это имя директории модуля  
-"1-sort-strings" - имя директории задачи  
-
-### To run a single test
-
-Чтобы запустить только один тест, можно воспользоваться командой:
-
-`jest -t '<describeString> <itString>'`
-
-к примеру команда:
-
-`jest -t 'javascript-data-types/sort-strings'`
-
-выполнит весь блок `describe`, а команда 
-
-`jest -t 'javascript-data-types/sort-strings should correctly sort strings started from uppercase'`
-
-выполнит только блок `it` с соответствующим названием.  
-Более подробно про запуск тестов можно посмотреть в документации [Jest](https://jestjs.io/docs/en/cli.html#--testnamepatternregex)
+  - ~~DashBoardPage~~
+  - ~~ProductsPage~~
+  - ~~SalesPage~~
+  - ~~CategoriesPage (реализовал и данный компонент)~~
+  - ProductFormPage (~~корректное удаление слушателей~~, разобраться почему не работают слушатели)
+  - ~~UndefinedPage~~
+  - ~~сделать слушателя, реагирующего на нажатия кнопок истории переходов <- , ->~~
+  - рефакторинг
+  - добавить контроллер для прерывания fetch запросов
+  - ~~собрать проект ( в конфиге вебпака может быть лишнее, так как я взял его со своего старого проекта и удалил, что точно не к месту )~~

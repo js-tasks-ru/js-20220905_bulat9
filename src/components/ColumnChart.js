@@ -1,6 +1,4 @@
-import fetchJson from './utils/fetch-json.js';
-
-const BACKEND_URL = 'https://course-js.javascript.ru';
+import errorHandler from "../store/errorHandler";
 
 export default class ColumnChart {
     chartHeight = 50;
@@ -22,7 +20,7 @@ export default class ColumnChart {
       this.formatHeading = formatHeading;
       this.range = {from: from.toISOString(), to: to.toISOString()};
       
-      this.url = new URL(url, BACKEND_URL);
+      this.url = new URL(url);
       this.updateURLByRange();
 
       this.title = title;
@@ -30,19 +28,22 @@ export default class ColumnChart {
 
       this.render();
     }
+
     getLinkOfTitle(link) {
       return !link.length
         ? ''
-        : `<a class="column-chart__link" href="${link}">View all</a>`;
+        : `<a class="column-chart__link" href="${link}">Подробнее</a>`;
     }
+
     createChart(currentValue) {
       const currentValueByScale = Math.floor(this.scale * currentValue);
-      const currentValueByPercent = (currentValue / Math.max(...this.data) * 100).toFixed(0);
       return `<div style="--value: ${currentValueByScale}" data-tooltip="${currentValue}"></div>`;
     }
+
     getColumnChartBody() {
       return this.data.map((currentValue) => this.createChart(currentValue)).join('');
     }
+
     get elementOfBodyColumnChart() {
       const element = document.createElement('div');
       const bodyOfElement = (
@@ -116,7 +117,8 @@ export default class ColumnChart {
 
         return JSONData;
       } catch (error) {
-        alert(error);
+        errorHandler(error);
+        //throw new Error('Ошибка сети/Ошибка на сервере');
       }
     }
 
